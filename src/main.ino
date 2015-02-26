@@ -22,19 +22,17 @@ void init_sensor(TCS34725 *sensor, int sdaPin, int sclPin) {
     else {
         ERROR_MESSAGE("Sensor not found");
     }
+
+    delay(1000); // let sensor "warm up"
 }
 
 void read_sensor(TCS34725 *sensor, int reading_number) {
     uint16_t clear, red, green, blue;
-    int index = 2 * reading_number + (sensorCode == 'A' ? 0 : 1);
-    int t = Time.now();
-
-    Spark.process();
 
     sensor->getRawData(&red, &green, &blue, &clear);
 
     Serial.print("Reading number: ");
-    Serial.print(i);
+    Serial.print(reading_number);
     Serial.print(", Clear: ");
     Serial.print(clear);
     Serial.print(", Red: ");
@@ -45,7 +43,7 @@ void read_sensor(TCS34725 *sensor, int reading_number) {
     Serial.println(blue);
 }
 
-void collect_sensor_readings(int assay_time) {
+void collect_sensor_readings() {
     for (int i = 0; i < 10; i += 1) { // take 10 sensor readings
         read_sensor(&tcsAssay, i);
         read_sensor(&tcsControl, i);
@@ -78,8 +76,7 @@ void loop(){
     init_sensor(&tcsAssay, pinAssaySDA, pinAssaySCL);
     init_sensor(&tcsControl, pinControlSDA, pinControlSCL);
 
-    int t = Time.now();
-    CANCELLABLE(collect_sensor_readings(t);)
+    collect_sensor_readings();
 
     tcsAssay.disable();
     tcsControl.disable();
